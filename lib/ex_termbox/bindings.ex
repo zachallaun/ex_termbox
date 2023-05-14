@@ -288,5 +288,9 @@ defmodule ExTermbox.Bindings do
     error("NIF stop_polling/1 not loaded")
   end
 
+  def poll_event do
+    error("NIF poll_event/0 not loaded")
+  end
+
   defp error(reason), do: :erlang.nif_error(reason)
 end

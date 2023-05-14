@@ -27,11 +27,13 @@ for {ch, x} <- Enum.with_index('Hello, World!') do
   :ok = Termbox.put_cell(%Cell{position: %Position{x: x, y: 0}, ch: ch})
 end
 
-for {ch, x} <- Enum.with_index('(Press <q> to quit)') do
-  :ok = Termbox.put_cell(%Cell{position: %Position{x: x, y: 2}, ch: ch})
-end
-
 Termbox.present()
+
+# e = Termbox.poll_event()
+
+# for {ch, x} <- Enum.with_index('(Press <q> to quit)') do
+#   :ok = Termbox.put_cell(%Cell{position: %Position{x: x, y: 2}, ch: ch})
+# end
 
 # When a key is pressed, it'll be sent to us by the event manager. Once we
 # receive a 'q' key press, we'll shut down the application.
@@ -39,4 +41,11 @@ receive do
   {:event, %Event{ch: ?q}} ->
     :ok = EventManager.stop()
     :ok = Termbox.shutdown()
+after
+  2_000 ->
+    :ok = EventManager.stop()
+    :ok = Termbox.shutdown()
+    IO.puts("got nothing")
 end
+
+# IO.inspect(e)

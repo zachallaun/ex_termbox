@@ -1,7 +1,6 @@
 PREFIX = $(MIX_APP_PATH)/priv
 BUILD  = $(MIX_APP_PATH)/obj
 
-TERMBOX_PATH = c_src/termbox
 TERMBOX_BUILD = $(MIX_APP_PATH)/termbox_build
 
 ifeq ($(CROSSCOMPILE),)
@@ -19,18 +18,15 @@ else
     CFLAGS += -fPIC
 endif
 
-NIF_CFLAGS += -I$(ERTS_INCLUDE_DIR) -I$(TERMBOX_PATH)/src
+NIF_CFLAGS += -I$(ERTS_INCLUDE_DIR)
 
-SOURCES = c_src/termbox_bindings.c $(TERMBOX_BUILD)/src/libtermbox.a
+SOURCES = c_src/termbox_bindings.c
 
 calling_from_make:
 	mix compile
 
 all: $(PREFIX)/termbox_bindings.so
 	@:
-
-$(TERMBOX_BUILD)/src/libtermbox.%: $(TERMBOX_BUILD)
-	cd $(TERMBOX_PATH) && CFLAGS="$(CFLAGS)" ./waf configure --prefix=. -o $(TERMBOX_BUILD) && ./waf
 
 $(PREFIX)/termbox_bindings.so: $(SOURCES) $(PREFIX)
 	$(CC) $(CFLAGS) $(NIF_CFLAGS) $(LDFLAGS) -o $@ $(SOURCES)

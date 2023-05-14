@@ -20,12 +20,15 @@
 #include <stdio.h>
 
 #include "erl_nif.h"
-#include "termbox.h"
+
+#define TB_IMPL
+#define TB_OPT_V1_COMPAT
+#include "termbox2.h"
 
 // Tracks whether termbox is initialized
 static volatile bool RUNNING = false;
 
-// Tracks whether events are currently being polled
+// Tracks whether events are currently being polle\nd
 static volatile bool POLLING = false;
 
 // Indicates that the polling thread should stop polling
@@ -46,11 +49,11 @@ ErlNifMutex *MUTEX = NULL;
 // easy to find the owner of an unreleased lock in debug mode.
 #ifdef EXTB_DEBUG
 
-#define LOCK(label)                                                            \
-  printf("LOCK (%s)\n", label);                                                \
+#define LOCK(label)                 \
+  printf("\n\rLOCK (%s)\n", label); \
   enif_mutex_lock(MUTEX)
-#define UNLOCK(label)                                                          \
-  printf("UNLOCK (%s)\n", label);                                              \
+#define UNLOCK(label)                 \
+  printf("\n\rUNLOCK (%s)\n", label); \
   enif_mutex_unlock(MUTEX)
 
 #else
@@ -60,15 +63,18 @@ ErlNifMutex *MUTEX = NULL;
 
 #endif
 
-static ERL_NIF_TERM extb_ok(ErlNifEnv *env) {
+static ERL_NIF_TERM extb_ok(ErlNifEnv *env)
+{
   return enif_make_atom(env, "ok");
 }
 
-static ERL_NIF_TERM extb_ok_tuple(ErlNifEnv *env, ERL_NIF_TERM term) {
+static ERL_NIF_TERM extb_ok_tuple(ErlNifEnv *env, ERL_NIF_TERM term)
+{
   return enif_make_tuple2(env, enif_make_atom(env, "ok"), term);
 }
 
-static ERL_NIF_TERM extb_error(ErlNifEnv *env, const char *reason) {
+static ERL_NIF_TERM extb_error(ErlNifEnv *env, const char *reason)
+{
   return enif_make_tuple2(env, enif_make_atom(env, "error"),
                           enif_make_atom(env, reason));
 }
@@ -78,10 +84,12 @@ static ERL_NIF_TERM extb_error(ErlNifEnv *env, const char *reason) {
 // ----------------------------------------------------------------------------
 
 static ERL_NIF_TERM extb_init(ErlNifEnv *env, int argc,
-                              const ERL_NIF_TERM argv[]) {
+                              const ERL_NIF_TERM argv[])
+{
   LOCK("init");
 
-  if (RUNNING) {
+  if (RUNNING)
+  {
     UNLOCK("init");
     return extb_error(env, "already_running");
   }
@@ -89,7 +97,8 @@ static ERL_NIF_TERM extb_init(ErlNifEnv *env, int argc,
   UNLOCK("init");
 
   int code = tb_init();
-  if (code == 0) {
+  if (code == 0)
+  {
     return extb_ok(env);
   }
   return enif_make_tuple2(env, enif_make_atom(env, "error"),
@@ -97,8 +106,10 @@ static ERL_NIF_TERM extb_init(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_width(ErlNifEnv *env, int argc,
-                               const ERL_NIF_TERM argv[]) {
-  if (!RUNNING) {
+                               const ERL_NIF_TERM argv[])
+{
+  if (!RUNNING)
+  {
     return extb_error(env, "not_running");
   }
 
@@ -107,8 +118,10 @@ static ERL_NIF_TERM extb_width(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_height(ErlNifEnv *env, int argc,
-                                const ERL_NIF_TERM argv[]) {
-  if (!RUNNING) {
+                                const ERL_NIF_TERM argv[])
+{
+  if (!RUNNING)
+  {
     return extb_error(env, "not_running");
   }
 
@@ -117,8 +130,10 @@ static ERL_NIF_TERM extb_height(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_clear(ErlNifEnv *env, int argc,
-                               const ERL_NIF_TERM argv[]) {
-  if (!RUNNING) {
+                               const ERL_NIF_TERM argv[])
+{
+  if (!RUNNING)
+  {
     return extb_error(env, "not_running");
   }
 
@@ -127,8 +142,10 @@ static ERL_NIF_TERM extb_clear(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_set_clear_attributes(ErlNifEnv *env, int argc,
-                                              const ERL_NIF_TERM argv[]) {
-  if (!RUNNING) {
+                                              const ERL_NIF_TERM argv[])
+{
+  if (!RUNNING)
+  {
     return extb_error(env, "not_running");
   }
 
@@ -141,8 +158,10 @@ static ERL_NIF_TERM extb_set_clear_attributes(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_present(ErlNifEnv *env, int argc,
-                                 const ERL_NIF_TERM argv[]) {
-  if (!RUNNING) {
+                                 const ERL_NIF_TERM argv[])
+{
+  if (!RUNNING)
+  {
     return extb_error(env, "not_running");
   }
 
@@ -151,8 +170,10 @@ static ERL_NIF_TERM extb_present(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_set_cursor(ErlNifEnv *env, int argc,
-                                    const ERL_NIF_TERM argv[]) {
-  if (!RUNNING) {
+                                    const ERL_NIF_TERM argv[])
+{
+  if (!RUNNING)
+  {
     return extb_error(env, "not_running");
   }
 
@@ -165,8 +186,10 @@ static ERL_NIF_TERM extb_set_cursor(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_change_cell(ErlNifEnv *env, int argc,
-                                     const ERL_NIF_TERM argv[]) {
-  if (!RUNNING) {
+                                     const ERL_NIF_TERM argv[])
+{
+  if (!RUNNING)
+  {
     return extb_error(env, "not_running");
   }
 
@@ -184,8 +207,10 @@ static ERL_NIF_TERM extb_change_cell(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_select_input_mode(ErlNifEnv *env, int argc,
-                                           const ERL_NIF_TERM argv[]) {
-  if (!RUNNING) {
+                                           const ERL_NIF_TERM argv[])
+{
+  if (!RUNNING)
+  {
     return extb_error(env, "not_running");
   }
 
@@ -196,8 +221,10 @@ static ERL_NIF_TERM extb_select_input_mode(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_select_output_mode(ErlNifEnv *env, int argc,
-                                            const ERL_NIF_TERM argv[]) {
-  if (!RUNNING) {
+                                            const ERL_NIF_TERM argv[])
+{
+  if (!RUNNING)
+  {
     return extb_error(env, "not_running");
   }
 
@@ -213,23 +240,42 @@ static ERL_NIF_TERM extb_select_output_mode(ErlNifEnv *env, int argc,
 
 // Stores the desired recipient of polled events (a local PID) and the thread's
 // id so it can later be joined.
-struct extb_poll_state {
+struct extb_poll_state
+{
   ErlNifTid thread_id;
   bool thread_joined;
   ErlNifPid recipient_pid;
 };
 
-void *extb_poll_async(void *arg) {
+static ERL_NIF_TERM extb_poll_event(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+  struct tb_event *event;
+  int poll_result = tb_poll_event(event);
+
+  return enif_make_tuple2(
+      env, enif_make_atom(env, "event"),
+      enif_make_tuple8(
+          env, enif_make_uint(env, event->type),
+          enif_make_uint(env, event->mod), enif_make_uint(env, event->key),
+          enif_make_uint(env, event->ch), enif_make_int(env, event->w),
+          enif_make_int(env, event->h), enif_make_int(env, event->x),
+          enif_make_int(env, event->y)));
+}
+
+void *extb_poll_async(void *arg)
+{
   struct extb_poll_state *state = (struct extb_poll_state *)arg;
   struct tb_event *event;
 
   int poll_result = 0;
 
-  while (!STOP_POLLING && poll_result >= 0) {
+  while (!STOP_POLLING && poll_result >= 0)
+  {
     event = enif_alloc(sizeof(struct tb_event));
     poll_result = tb_peek_event(event, 10);
 
-    if (poll_result > 0) {
+    if (poll_result > 0)
+    {
       ErlNifEnv *env = enif_alloc_env();
       ERL_NIF_TERM result = enif_make_tuple2(
           env, enif_make_atom(env, "event"),
@@ -259,8 +305,10 @@ void *extb_poll_async(void *arg) {
   return NULL;
 };
 
-void extb_join_poll_thread(struct extb_poll_state *state) {
-  if (!state->thread_joined) {
+void extb_join_poll_thread(struct extb_poll_state *state)
+{
+  if (!state->thread_joined)
+  {
     state->thread_joined = true;
     enif_thread_join(state->thread_id, NULL);
   }
@@ -268,21 +316,25 @@ void extb_join_poll_thread(struct extb_poll_state *state) {
 
 // If the poll handle (the Erlang resource object) will be garbage collected,
 // make sure that the thread is joined.
-void extb_poll_state_destructor(ErlNifEnv *env, void *arg) {
+void extb_poll_state_destructor(ErlNifEnv *env, void *arg)
+{
   struct extb_poll_state *state = (struct extb_poll_state *)arg;
   extb_join_poll_thread(state);
 }
 
 static ERL_NIF_TERM extb_start_polling(ErlNifEnv *env, int argc,
-                                       const ERL_NIF_TERM argv[]) {
+                                       const ERL_NIF_TERM argv[])
+{
   LOCK("start_polling");
 
   // Only one event polling thread may run at a time.
-  if (!RUNNING) {
+  if (!RUNNING)
+  {
     UNLOCK("start_polling");
     return extb_error(env, "not_running");
   }
-  if (POLLING) {
+  if (POLLING)
+  {
     UNLOCK("start_polling");
     return extb_error(env, "already_polling");
   }
@@ -312,19 +364,23 @@ static ERL_NIF_TERM extb_start_polling(ErlNifEnv *env, int argc,
 }
 
 static ERL_NIF_TERM extb_stop_polling(ErlNifEnv *env, int argc,
-                                      const ERL_NIF_TERM argv[]) {
+                                      const ERL_NIF_TERM argv[])
+{
   LOCK("stop_polling");
 
-  if (!RUNNING) {
+  if (!RUNNING)
+  {
     UNLOCK("stop_polling");
     return extb_error(env, "not_running");
   }
-  if (!POLLING) {
+  if (!POLLING)
+  {
     UNLOCK("stop_polling");
     return extb_error(env, "not_polling");
   }
 
-  if (POLL_STATE) {
+  if (POLL_STATE)
+  {
     STOP_POLLING = true;
     UNLOCK("stop_polling");
     extb_join_poll_thread(POLL_STATE);
@@ -342,17 +398,20 @@ static ERL_NIF_TERM extb_stop_polling(ErlNifEnv *env, int argc,
 // ----------------------------------------------------------------------------
 
 static ERL_NIF_TERM extb_shutdown(ErlNifEnv *env, int argc,
-                                  const ERL_NIF_TERM argv[]) {
+                                  const ERL_NIF_TERM argv[])
+{
   LOCK("shutdown");
 
-  if (!RUNNING) {
+  if (!RUNNING)
+  {
     UNLOCK("shutdown");
     return extb_error(env, "not_running");
   }
   RUNNING = false;
 
   // Ensure that polling has been stopped and that any polling thread is joined.
-  if (POLL_STATE) {
+  if (POLL_STATE)
+  {
     STOP_POLLING = true;
     UNLOCK("shutdown");
     extb_join_poll_thread(POLL_STATE);
@@ -370,7 +429,8 @@ static ERL_NIF_TERM extb_shutdown(ErlNifEnv *env, int argc,
 // NIF INITIALIZATION & CALLBACKS
 // ----------------------------------------------------------------------------
 
-int extb_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
+int extb_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
+{
   // Create a resource type for the poll state.
   int flags = ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER;
   const char *resource_type_name = "extb-thread-handler";
@@ -396,6 +456,7 @@ static ErlNifFunc funcs[] = {
     {"select_output_mode", 1, extb_select_output_mode},
     {"start_polling", 1, extb_start_polling},
     {"stop_polling", 0, extb_stop_polling},
-    {"shutdown", 0, extb_shutdown}};
+    {"shutdown", 0, extb_shutdown},
+    {"poll_event", 0, extb_poll_event, ERL_NIF_DIRTY_JOB_IO_BOUND}};
 
 ERL_NIF_INIT(Elixir.ExTermbox.Bindings, funcs, extb_load, NULL, NULL, NULL)
